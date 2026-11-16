@@ -1,10 +1,12 @@
 const express = require("express");
-
+const Task = require("../models/Task");
 const router = express.Router();
 
 const tasks = [];
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  const tasks = await Task.find();
+
   res.status(200).json({ items: tasks });
 });
 
@@ -22,7 +24,7 @@ router.get("/:id", (req, res) => {
   res.status(200).json(task);
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   if (typeof req.body.title !== "string" || req.body.title.trim() === "") {
     return res.status(400).json({
       error: "Le titre est obligatoire",
@@ -74,13 +76,12 @@ router.post("/", (req, res) => {
     }
   }
 
-  const task = {
-    id: tasks.length + 1,
+  const task = await Task.create({
     title: req.body.title,
     status: req.body.status,
     description: req.body.description,
     dueDate: req.body.dueDate,
-  };
+  });
 
   tasks.push(task);
   res.status(201).json({
