@@ -1,8 +1,7 @@
 const express = require("express");
 const Task = require("../models/Task");
 const router = express.Router();
-
-const tasks = [];
+const mongoose = require("mongoose");
 
 router.get("/", async (req, res) => {
   const tasks = await Task.find();
@@ -10,10 +9,15 @@ router.get("/", async (req, res) => {
   res.status(200).json({ items: tasks });
 });
 
-router.get("/:id", (req, res) => {
-  const id = Number(req.params.id);
+router.get("/:id", async (req, res) => {
+  const id = req.params.id;
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({
+      error: "Identifiant de tâche invalide",
+    });
+  }
 
-  const task = tasks.find((task) => task.id === id);
+  const task = await Task.findById(id);
 
   if (!task) {
     return res.status(404).json({
@@ -83,17 +87,22 @@ router.post("/", async (req, res) => {
     dueDate: req.body.dueDate,
   });
 
-  tasks.push(task);
   res.status(201).json({
     message: "Données reçues",
     task: task,
   });
   console.log(task);
 });
-router.patch("/:id", (req, res) => {
-  const id = Number(req.params.id);
+router.patch("/:id", async (req, res) => {
+  const id = req.params.id;
 
-  const task = tasks.find((task) => task.id === id);
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({
+      error: "Identifiant de tâche invalide",
+    });
+  }
+
+  const task = await Task.findById(id);
 
   if (!task) {
     return res.status(404).json({
@@ -106,22 +115,27 @@ router.patch("/:id", (req, res) => {
     });
   }
   task.status = req.body.status;
+  await task.save();
 
   res.status(200).json(task);
 });
 
-router.delete("/:id", (req, res) => {
-  const id = Number(req.params.id);
+router.delete("/:id", async (req, res) => {
+  const id = req.params.id;
 
-  const index = tasks.findIndex((task) => task.id === id);
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({
+      error: "Identifiant de tâche invalide",
+    });
+  }
 
-  if (index === -1) {
+  const task = await Task.findByIdAndDelete(id);
+
+  if (!task) {
     return res.status(404).json({
       error: "Tâche introuvable",
     });
   }
-
-  tasks.splice(index, 1);
 
   res.status(204).send();
 });
