@@ -109,4 +109,20 @@ router.patch("/:id", (req, res) => {
   res.status(200).json(task);
 });
 
+router.delete("/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const index = tasks.findIndex((task) => task.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({
+      error: "Tâche introuvable",
+    });
+  }
+
+  tasks.splice(index, 1);
+
+  res.status(204).send();
+});
+
 module.exports = router;
