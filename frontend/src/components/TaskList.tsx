@@ -8,23 +8,41 @@ type Props = {
   onUpdate: (id: string, title: string) => Promise<void>;
 };
 
-function TaskList({ tasks, onDelete, onStatusChange, onUpdate }: Props) {
-  if (tasks.length === 0) {
-    return <p>Aucune tâche pour le moment.</p>;
-  }
+const columns = [
+  { status: "todo", title: "À faire" },
+  { status: "doing", title: "En cours" },
+  { status: "done", title: "Terminées" },
+] as const;
 
+function TaskList({ tasks, onDelete, onStatusChange, onUpdate }: Props) {
   return (
-    <ul>
-      {tasks.map((task) => (
-        <TaskItem
-          key={task._id}
-          task={task}
-          onDelete={onDelete}
-          onStatusChange={onStatusChange}
-          onUpdate={onUpdate}
-        />
-      ))}
-    </ul>
+    <div className="kanban-board">
+      {columns.map((column) => {
+        const filteredTasks = tasks.filter(
+          (task) => task.status === column.status,
+        );
+
+        return (
+          <div className="kanban-column" key={column.status}>
+            <h3>
+              {column.title} ({filteredTasks.length})
+            </h3>
+
+            <div className="kanban-cards">
+              {filteredTasks.map((task) => (
+                <TaskItem
+                  key={task._id}
+                  task={task}
+                  onDelete={onDelete}
+                  onStatusChange={onStatusChange}
+                  onUpdate={onUpdate}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

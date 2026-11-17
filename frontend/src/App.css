@@ -193,3 +193,61 @@ li.task-done span {
   text-decoration: line-through;
   color: #94a3b8;
 }
+
+/* Tableau Kanban */
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kanban-column {
+  min-width: 0;
+  padding: 16px;
+  background: #f1f5f9;
+  border-radius: 16px;
+}
+
+.kanban-column h3 {
+  font-size: 1rem;
+  color: #334155;
+  margin: 0 0 16px;
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.kanban-cards li {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+}
+
+.kanban-cards li span {
+  width: 100%;
+}
+
+.kanban-cards li input {
+  width: 100%;
+}
+
+.kanban-cards li button,
+.kanban-cards li select {
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
+  }
+}
