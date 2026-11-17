@@ -117,6 +117,7 @@ router.post("/", async (req, res) => {
     });
   }
 });
+
 router.patch("/:id", async (req, res) => {
   try {
     const id = req.params.id;
@@ -134,12 +135,35 @@ router.patch("/:id", async (req, res) => {
         error: "Tâche introuvable",
       });
     }
-    if (!["todo", "doing", "done"].includes(req.body.status)) {
-      return res.status(400).json({
-        error: "Le statut doit être todo, doing ou done",
-      });
+
+    // Modifier le titre uniquement s'il est envoyé
+    if (req.body.title !== undefined) {
+      if (typeof req.body.title !== "string" || req.body.title.trim() === "") {
+        return res.status(400).json({
+          error: "Le titre est obligatoire",
+        });
+      }
+
+      if (req.body.title.trim().length > 120) {
+        return res.status(400).json({
+          error: "Le titre ne doit pas dépasser 120 caractères",
+        });
+      }
+
+      task.title = req.body.title.trim();
     }
-    task.status = req.body.status;
+
+    // Modifier le statut uniquement s'il est envoyé
+    if (req.body.status !== undefined) {
+      if (!["todo", "doing", "done"].includes(req.body.status)) {
+        return res.status(400).json({
+          error: "Le statut doit être todo, doing ou done",
+        });
+      }
+
+      task.status = req.body.status;
+    }
+
     await task.save();
 
     res.status(200).json(task);
