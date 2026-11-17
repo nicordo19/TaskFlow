@@ -1,82 +1,195 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import LoginForm from "./components/LoginForm";
+import RegisterForm from "./components/RegisterForm";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
+
+import { getCurrentUser, logout } from "./services/authService";
+
 import type { Task } from "./types/Task";
+import type { User } from "./types/User";
 
 const API_URL = "http://localhost:3000/api/tasks";
 
+type AuthPage = "login" | "register";
+
 function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [authPage, setAuthPage] = useState<AuthPage>("login");
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
+  // Vérifier la session au chargement
   useEffect(() => {
-    const loadTasks = async () => {
+    let active = true;
+
+    const checkAuth = async () => {
       try {
-        const response = await fetch(API_URL);
+        const currentUser = await getCurrentUser();
+
+        if (active) {
+          setUser(currentUser);
+        }
+      } catch (err) {
+        if (active) {
+          setAuthError(
+            err instanceof Error
+              ? err.message
+              : "Impossible de vérifier la session",
+          );
+        }
+      } finally {
+        if (active) {
+          setCheckingAuth(false);
+        }
+      }
+    };
+
+    void checkAuth();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Charger les tâches de l'utilisateur connecté
+  useEffect(() => {
+    if (!user) {
+      setTasks([]);
+      return;
+    }
+
+    let active = true;
+
+    const loadTasks = async () => {
+      setError("");
+
+      try {
+        const response = await fetch(API_URL, {
+          credentials: "include",
+        });
 
         if (!response.ok) {
-          throw new Error("Impossible de récupérer les tâches");
+          throw new Error("Impossible de charger les tâches");
         }
 
-        const data: { items: Task[] } = await response.json();
-        setTasks(data.items);
-      } catch (error) {
-        console.error(error);
-        setError("Erreur lors du chargement des tâches");
+        const data: Task[] = await response.json();
+
+        if (active) {
+          setTasks(data);
+        }
+      } catch (err) {
+        if (active) {
+          setError(
+            err instanceof Error ? err.message : "Une erreur est survenue",
+          );
+        }
       }
     };
 
     void loadTasks();
-  }, []);
 
-  const addTask = async (title: string): Promise<void> => {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        status: "todo",
-      }),
-    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
-    if (!response.ok) {
-      throw new Error("Impossible de créer la tâche");
-    }
-
-    const data: { task: Task } = await response.json();
-
-    setTasks((previous) => [...previous, data.task]);
+  // Après une connexion ou une inscription
+  const handleAuthSuccess = (connectedUser: User) => {
+    setAuthError("");
     setError("");
+    setTasks([]);
+    setUser(connectedUser);
   };
 
-  const deleteTask = async (id: string): Promise<void> => {
+  // Déconnexion
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    setAuthError("");
+
+    try {
+      await logout();
+
+      setUser(null);
+      setTasks([]);
+      setAuthPage("login");
+    } catch (err) {
+      setAuthError(
+        err instanceof Error ? err.message : "Impossible de se déconnecter",
+      );
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  // Ajouter une tâche
+
+  // Ajouter une tâche
+  const handleAddTask = async (title: string) => {
+    setError("");
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          description: "",
+          dueDate: null,
+          status: "todo",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Impossible de créer la tâche");
+      }
+
+      const newTask: Task = await response.json();
+
+      setTasks((previousTasks) => [newTask, ...previousTasks]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+    }
+  };
+
+  // Supprimer une tâche
+  const handleDeleteTask = async (id: string) => {
+    setError("");
+
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       if (!response.ok) {
         throw new Error("Impossible de supprimer la tâche");
       }
 
-      setTasks((previous) => previous.filter((task) => task._id !== id));
-      setError("");
-    } catch (error) {
-      console.error(error);
-      setError("Erreur lors de la suppression");
+      setTasks((previousTasks) =>
+        previousTasks.filter((task) => task._id !== id),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
     }
   };
 
-  const updateTaskStatus = async (
-    id: string,
-    status: Task["status"],
-  ): Promise<void> => {
+  // Modifier le statut d'une tâche
+  const handleStatusChange = async (id: string, status: Task["status"]) => {
+    setError("");
+
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -87,56 +200,113 @@ function App() {
         throw new Error("Impossible de modifier le statut");
       }
 
-      setTasks((previous) =>
-        previous.map((task) => (task._id === id ? { ...task, status } : task)),
+      const updatedTask: Task = await response.json();
+
+      setTasks((previousTasks) =>
+        previousTasks.map((task) => (task._id === id ? updatedTask : task)),
       );
-
-      setError("");
-    } catch (error) {
-      console.error(error);
-      setError("Erreur lors de la modification du statut");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
     }
   };
 
-  const updateTask = async (id: string, title: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title }),
-    });
+  // Modifier le titre d'une tâche
+  const handleUpdateTask = async (id: string, title: string) => {
+    setError("");
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || "Impossible de modifier la tâche");
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Impossible de modifier la tâche");
+      }
+
+      const updatedTask: Task = await response.json();
+
+      setTasks((previousTasks) =>
+        previousTasks.map((task) => (task._id === id ? updatedTask : task)),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
     }
+  };
 
-    setTasks((previous) =>
-      previous.map((task) => (task._id === id ? { ...task, title } : task)),
+  // Chargement de la session
+  if (checkingAuth) {
+    return (
+      <div className="auth-container">
+        <p>Chargement de TaskFlow...</p>
+      </div>
     );
-  };
+  }
 
+  // Utilisateur non connecté
+  if (!user) {
+    return (
+      <>
+        {authError && (
+          <p className="auth-error" role="alert">
+            {authError}
+          </p>
+        )}
+
+        {authPage === "login" ? (
+          <LoginForm
+            onLogin={handleAuthSuccess}
+            onSwitchToRegister={() => setAuthPage("register")}
+          />
+        ) : (
+          <RegisterForm
+            onRegister={handleAuthSuccess}
+            onSwitchToLogin={() => setAuthPage("login")}
+          />
+        )}
+      </>
+    );
+  }
+
+  // Utilisateur connecté
   return (
-    <main>
-      <h1>TaskFlow</h1>
-      <p>Bienvenue dans mon gestionnaire de tâches !</p>
+    <div className="app">
+      <header className="app-header">
+        <div>
+          <h1>TaskFlow</h1>
+          <p>Bienvenue, {user.name} !</p>
+        </div>
 
-      <section>
-        <h2>Mes tâches</h2>
+        <button type="button" onClick={handleLogout} disabled={loggingOut}>
+          {loggingOut ? "Déconnexion..." : "Se déconnecter"}
+        </button>
+      </header>
 
-        <TaskForm onAdd={addTask} />
+      {authError && (
+        <p className="auth-error" role="alert">
+          {authError}
+        </p>
+      )}
 
-        {error && <p role="alert">{error}</p>}
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
 
-        <TaskList
-          tasks={tasks}
-          onDelete={deleteTask}
-          onStatusChange={updateTaskStatus}
-          onUpdate={updateTask}
-        />
-      </section>
-    </main>
+      <TaskForm onAdd={handleAddTask} />
+
+      <TaskList
+        tasks={tasks}
+        onDelete={handleDeleteTask}
+        onStatusChange={handleStatusChange}
+        onUpdate={handleUpdateTask}
+      />
+    </div>
   );
 }
 
