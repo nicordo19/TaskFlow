@@ -12,6 +12,21 @@ function TaskItem({ task, onDelete, onStatusChange, onUpdate }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
 
+  const [description, setDescription] = useState(task.description || "");
+
+  const [dueDate, setDueDate] = useState(
+    task.dueDate ? task.dueDate.slice(0, 10) : "",
+  );
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  };
+
   const handleSave = async () => {
     if (!title.trim()) return;
 
@@ -27,14 +42,29 @@ function TaskItem({ task, onDelete, onStatusChange, onUpdate }: Props) {
     <li className={`task-${task.status}`}>
       {isEditing ? (
         <>
+          <textarea
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="Description de la tâche"
+            rows={4}
+          />
+
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(event) => setDueDate(event.target.value)}
+          />
+
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={120}
           />
+
           <button type="button" onClick={handleSave}>
             Enregistrer
           </button>
+
           <button
             type="button"
             onClick={() => {
@@ -47,7 +77,28 @@ function TaskItem({ task, onDelete, onStatusChange, onUpdate }: Props) {
         </>
       ) : (
         <>
-          <span>{task.title}</span>
+          {/* Titre */}
+          <span className="task-title">{task.title}</span>
+
+          {/* Description */}
+          {task.description && (
+            <p className="task-description">{task.description}</p>
+          )}
+
+          {/* Date limite */}
+          {task.dueDate && (
+            <p className="task-date">
+              📅 Date limite : {formatDate(task.dueDate)}
+            </p>
+          )}
+
+          {/* Date de création */}
+          {task.createdAt && (
+            <p className="task-created">
+              Créée le {formatDate(task.createdAt)}
+            </p>
+          )}
+
           <button type="button" onClick={() => setIsEditing(true)}>
             Modifier
           </button>

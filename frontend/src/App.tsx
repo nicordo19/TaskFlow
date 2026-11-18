@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+import type { NewTask } from "./components/TaskForm";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 
@@ -130,7 +131,9 @@ function App() {
   // Ajouter une tâche
 
   // Ajouter une tâche
-  const handleAddTask = async (title: string) => {
+
+  // Ajouter une tâche
+  const handleAddTask = async (newTask: NewTask) => {
     setError("");
 
     try {
@@ -141,9 +144,9 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title,
-          description: "",
-          dueDate: null,
+          title: newTask.title,
+          description: newTask.description,
+          dueDate: newTask.dueDate,
           status: "todo",
         }),
       });
@@ -152,11 +155,15 @@ function App() {
         throw new Error("Impossible de créer la tâche");
       }
 
-      const newTask: Task = await response.json();
+      const createdTask: Task = await response.json();
 
-      setTasks((previousTasks) => [newTask, ...previousTasks]);
+      setTasks((previousTasks) => [createdTask, ...previousTasks]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+      const message =
+        err instanceof Error ? err.message : "Une erreur est survenue";
+
+      setError(message);
+      throw err;
     }
   };
 
