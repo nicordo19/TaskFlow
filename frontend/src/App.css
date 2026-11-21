@@ -1,0 +1,954 @@
+/* =========================================================
+   TASKFLOW — STYLES PRINCIPAUX
+   Sections : fondations, dashboard, formulaire, Kanban,
+   authentification Aurora Glass, responsive et accessibilité.
+   ========================================================= */
+
+:root {
+  --primary: #6d28d9;
+  --primary-hover: #5b21b6;
+  --primary-soft: #f5f3ff;
+  --accent: #3b82f6;
+  --text: #1e293b;
+  --muted: #64748b;
+  --subtle: #94a3b8;
+  --surface: #fff;
+  --surface-soft: #f8faff;
+  --border: #e2e8f0;
+  --danger: #be123c;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 4px 16px rgba(30, 41, 59, 0.05);
+  --shadow-card: 0 14px 38px rgba(76, 29, 149, 0.08);
+  --gradient: linear-gradient(115deg, #7c3aed, #6366f1 55%, #3b82f6);
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.38);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: anywhere;
+}
+
+/* 1. TABLEAU DE BORD */
+
+.app {
+  width: min(100%, 1450px);
+  margin: 0 auto;
+  padding: 34px 32px 72px;
+  animation: appear 0.4s ease-out both;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 26px 30px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-header h1 {
+  margin: 0 0 6px;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -0.055em;
+  line-height: 1.1;
+  background: var(--gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.app-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.app-header button {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  border: 1px solid #ddd6fe;
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.app-header button:hover:not(:disabled) {
+  background: #ede9fe;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.error,
+.auth-error,
+[role="alert"] {
+  margin: 0 0 18px;
+  padding: 13px 15px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* 2. FORMULAIRE DE CRÉATION DE TÂCHE */
+
+.app .task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  margin: 0 0 30px;
+  padding: 30px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+}
+
+.task-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.task-form label {
+  margin-top: 8px;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.task-form label:first-child {
+  margin-top: 0;
+}
+
+.task-form input,
+.task-form textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--text);
+  line-height: 1.5;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.task-form textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.task-form input::placeholder,
+.task-form textarea::placeholder {
+  color: var(--subtle);
+}
+
+.task-form input:hover,
+.task-form textarea:hover {
+  border-color: #c4b5fd;
+}
+
+.task-form input:focus,
+.task-form textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+}
+
+.task-form input[type="date"] {
+  color-scheme: light;
+  cursor: pointer;
+}
+
+.task-form input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+.app .task-form button[type="submit"] {
+  align-self: flex-start;
+  min-width: 190px;
+  padding: 14px 25px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--gradient);
+  color: white;
+  font-weight: 750;
+  box-shadow: 0 7px 20px rgba(109, 40, 217, 0.19);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.app .task-form button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 26px rgba(109, 40, 217, 0.25);
+}
+
+/* 3. TABLEAU KANBAN */
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+  width: 100%;
+}
+
+.kanban-column {
+  min-width: 0;
+  min-height: 390px;
+  padding: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: var(--radius-lg);
+  background: rgba(241, 245, 249, 0.83);
+}
+
+.kanban-column h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.kanban-column h3::before {
+  content: "";
+  flex: 0 0 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.kanban-column:nth-child(2) h3::before {
+  background: #3b82f6;
+}
+
+.kanban-column:nth-child(3) h3::before {
+  background: #22c55e;
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 80px;
+  max-height: 650px;
+  margin: 0;
+  padding: 2px 4px 8px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: #c4b5fd transparent;
+}
+
+/* 4. CARTES : TITRE, DESCRIPTION ET DATES */
+
+.kanban-cards li {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #e8eaf5;
+  border-left: 4px solid #94a3b8;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.kanban-cards li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.kanban-cards li.task-todo {
+  border-left-color: #94a3b8;
+}
+
+.kanban-cards li.task-doing {
+  border-left-color: #3b82f6;
+}
+
+.kanban-cards li.task-done {
+  border-left-color: #22c55e;
+}
+
+.kanban-cards li .task-title {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+  font-size: 1.03rem;
+  font-weight: 750;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.kanban-cards li.task-done .task-title {
+  color: var(--subtle);
+  text-decoration: line-through;
+}
+
+.kanban-cards li .task-description {
+  margin: 0;
+  padding: 12px 13px;
+  border: 1px solid #edf0f7;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   PARTIE 2/2 — FIN DES CARTES, AUTH ET RESPONSIVE
+   ========================================================= */
+
+/* 5. DATES DES TÂCHES */
+
+.kanban-cards li .task-date {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid #ddd6fe;
+  border-radius: 10px;
+  background: #f5f3ff;
+  color: #6d28d9;
+  font-size: 0.85rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.kanban-cards li .task-created {
+  margin: 0;
+  padding-top: 11px;
+  border-top: 1px solid #f1f5f9;
+  color: var(--subtle);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* 6. MODIFICATION ET ACTIONS DES CARTES */
+
+.kanban-cards li input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+}
+
+.kanban-cards li input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+}
+
+/* Statut de la tâche */
+.kanban-cards li select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+
+  padding: 9px 12px;
+
+  border: 1px solid #ddd6fe;
+  border-radius: 9px;
+
+  background: #f5f3ff;
+  color: var(--primary);
+
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+/* Boutons Modifier et Supprimer */
+.kanban-cards li button {
+  width: fit-content;
+  align-self: flex-start;
+
+  padding: 7px 13px;
+
+  border: 1px solid #e9d5ff;
+  border-radius: 8px;
+
+  background: #f5f3ff;
+  color: var(--primary);
+
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.kanban-cards li button:hover:not(:disabled) {
+  background: #ede9fe;
+  transform: translateY(-1px);
+}
+
+.kanban-cards li > button:last-child {
+  border-color: #ffe4e6;
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.kanban-cards li > button:last-child:hover:not(:disabled) {
+  background: #ffe4e6;
+}
+
+/* 7. CONNEXION ET INSCRIPTION — AURORA GLASS */
+
+.auth-container {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 50px 20px;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      ellipse at 15% 20%,
+      rgba(196, 181, 253, 0.7),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 85% 80%,
+      rgba(147, 197, 253, 0.65),
+      transparent 45%
+    ),
+    linear-gradient(135deg, #f8f7ff, #eef2ff 48%, #eaf4ff);
+}
+
+.auth-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(rgba(109, 40, 217, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(109, 40, 217, 0.055) 1px, transparent 1px);
+
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 15%, transparent 80%);
+}
+
+.auth-container::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+
+  width: min(75vw, 850px);
+  aspect-ratio: 1;
+  left: -15%;
+  top: -35%;
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.3),
+    rgba(99, 102, 241, 0.16) 38%,
+    transparent 70%
+  );
+
+  filter: blur(35px);
+  animation: aurora-drift 14s ease-in-out infinite alternate;
+}
+
+/* Carte de connexion */
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 465px;
+  padding: 44px 42px;
+
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.78);
+
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+
+  box-shadow:
+    0 30px 80px rgba(91, 33, 182, 0.13),
+    0 8px 25px rgba(59, 130, 246, 0.06);
+
+  animation: auth-appear 0.65s ease-out both;
+}
+
+.auth-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.65),
+    rgba(59, 130, 246, 0.65),
+    transparent
+  );
+}
+
+/* Titres */
+
+.auth-card h1 {
+  margin: 0 0 34px;
+  text-align: center;
+  font-size: clamp(2.5rem, 5vw, 3.2rem);
+  font-weight: 850;
+  letter-spacing: -0.065em;
+
+  background: var(--gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-card h2 {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.auth-subtitle {
+  margin: 0 0 30px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Formulaire de connexion */
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+}
+
+.auth-card .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.auth-card label {
+  color: #334155;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.auth-card input {
+  width: 100%;
+  min-width: 0;
+  padding: 15px 17px;
+
+  border: 1.5px solid var(--border);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.88);
+
+  color: var(--text);
+  font-size: 1rem;
+
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    background 0.25s;
+}
+
+.auth-card input::placeholder {
+  color: var(--subtle);
+}
+
+.auth-card input:hover {
+  border-color: #c4b5fd;
+}
+
+.auth-card input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  background: #fff;
+
+  box-shadow:
+    0 0 0 4px rgba(139, 92, 246, 0.12),
+    0 5px 18px rgba(109, 40, 217, 0.06);
+}
+
+/* Bouton connexion / inscription */
+
+.auth-card .auth-button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 16px 22px;
+
+  border: 0;
+  border-radius: 13px;
+  background: var(--gradient);
+
+  color: white;
+  font-size: 1rem;
+  font-weight: 750;
+
+  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.23);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+
+.auth-card .auth-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(109, 40, 217, 0.3);
+}
+
+/* Bas du formulaire */
+
+.auth-footer {
+  margin: 28px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.auth-card .auth-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.auth-card .auth-link:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+.auth-card .auth-error {
+  margin: 0;
+}
+
+/* 8. RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .app {
+    padding: 28px 22px 60px;
+  }
+
+  .kanban-board {
+    gap: 14px;
+  }
+
+  .kanban-column {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 850px) {
+  .kanban-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kanban-column:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .kanban-column {
+    min-height: 280px;
+  }
+
+  .kanban-cards {
+    max-height: 500px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 16px 12px 40px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 22px 20px;
+  }
+
+  .app-header button {
+    width: 100%;
+  }
+
+  .app .task-form {
+    padding: 20px 16px;
+    gap: 18px;
+  }
+
+  .task-form input,
+  .task-form textarea {
+    padding: 13px 14px;
+    font-size: 16px;
+  }
+
+  .app .task-form button[type="submit"] {
+    width: 100%;
+    min-width: 0;
+    align-self: stretch;
+  }
+
+  .kanban-board {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .kanban-column:last-child {
+    grid-column: auto;
+  }
+
+  .kanban-column {
+    min-height: 180px;
+    padding: 16px;
+  }
+
+  .kanban-cards {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .auth-container {
+    padding: 20px 14px;
+  }
+
+  .auth-card {
+    padding: 30px 22px;
+    border-radius: 22px;
+  }
+
+  .auth-card input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .app {
+    padding-inline: 8px;
+  }
+
+  .auth-card {
+    padding: 24px 16px;
+  }
+
+  .kanban-column {
+    padding: 12px;
+  }
+}
+
+/* 9. ANIMATIONS ET ACCESSIBILITÉ */
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auth-appear {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes aurora-drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(48vw, 25vh) scale(0.95);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .auth-card {
+    background: rgba(255, 255, 255, 0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .auth-card {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ORDRE DES ELEMENTS DANS LES CARTES */
+
+/* Titre : toujours en premier */
+.kanban-cards li .task-title,
+.kanban-cards li input:not([type="date"]) {
+  order: 1;
+}
+
+/* Description : deuxième */
+.kanban-cards li .task-description,
+.kanban-cards li textarea {
+  order: 2;
+}
+
+/* Date limite : troisième */
+.kanban-cards li .task-date,
+.kanban-cards li input[type="date"] {
+  order: 3;
+}
+
+/* Date de création */
+.kanban-cards li .task-created {
+  order: 4;
+}
+
+/* Statut au-dessus des boutons */
+.kanban-cards li select {
+  order: 5;
+  margin-bottom: 12px;
+}
+
+/* Boutons en dernier */
+.kanban-cards li button {
+  order: 6;
+}
+
+/* Apparence de la description en édition */
+.kanban-cards li textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 110px;
+  padding: 12px 13px;
+
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #f8faff;
+  color: #1e293b;
+
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+
+  resize: vertical;
+}
+
+.kanban-cards li textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+}
